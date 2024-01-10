@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import './App.css';
+import { CreateItem } from './components/CreateItem';
+import { Item } from './components/Item';
+import { useItems } from './hooks/useItems';
+import { ItemId } from './types/ItemId';
 
 function App() {
-  const [count, setCount] = useState(0)
+	const { items, addItem, removeItem } = useItems();
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+
+		const { elements } = event.currentTarget;
+		const input = elements.namedItem('item');
+		const isInput = input instanceof HTMLInputElement;
+		if (!isInput || input === null) return;
+
+		addItem(input.value);
+
+		input.value = '';
+	};
+
+	const createHandleRemoveItem = (id: ItemId) => () => {
+		removeItem(id);
+	};
+
+	return (
+		<main>
+			<aside>
+				<h1>Prueba técnica</h1>
+				<h2>Añadir elemento a la lista</h2>
+				<CreateItem handleSubmit={handleSubmit} />
+			</aside>
+			<section>
+				<h2>Listado de elementos agregados</h2>
+				{items.length === 0 ? (
+					<p>
+						<strong>No hay elementos</strong>
+					</p>
+				) : (
+					<ul>
+						{items.map((item) => (
+							<Item
+								key={item.id}
+								text={item.text}
+								handleClick={createHandleRemoveItem(item.id)}
+							/>
+						))}
+					</ul>
+				)}
+			</section>
+		</main>
+	);
 }
 
-export default App
+export default App;
